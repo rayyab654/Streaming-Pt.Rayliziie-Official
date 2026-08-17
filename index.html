@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PT. Rayliziie Official — Gateway Media OTT & Streaming Premium</title>
+  <title>PT. Rayliziie Official — Gateway Media OTT, Live Chat & Community Hub</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -48,10 +48,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Supabase Library CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
+      height: 6px;
     }
     .dark ::-webkit-scrollbar-track { background: #070a12; }
     .dark ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
@@ -61,7 +64,6 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
 
-    /* Ultra Smooth Color Transitions */
     body, header, section, div, footer, button, a {
       transition: background-color 0.3s ease, 
                   color 0.2s ease, 
@@ -70,24 +72,18 @@
                   transform 0.2s ease;
     }
 
-    /* Mobile Responsive Custom Tweaks */
     @media (max-width: 640px) {
-      html {
-        font-size: 14px;
-      }
-      .ambient-orb-1, .ambient-orb-2 {
-        display: none; /* Disable heavy blur orbs on mobile for performance and tight view */
-      }
+      html { font-size: 14px; }
+      .ambient-orb-1, .ambient-orb-2 { display: none; }
     }
 
-    /* Premium Glassmorphism Cards */
+    /* Glassmorphism Classes */
     .dark .glass-card {
       background: rgba(14, 20, 36, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    
     .glass-card {
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(20px);
@@ -96,14 +92,14 @@
     }
 
     .dark .glass-nav {
-      background: rgba(7, 10, 18, 0.85);
+      background: rgba(7, 10, 18, 0.88);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .glass-nav {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -142,7 +138,6 @@
       100% { transform: translateY(20px) scale(0.95); }
     }
 
-    /* Metallic Text Gradient */
     .text-gradient-cyan {
       background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
       -webkit-background-clip: text;
@@ -155,7 +150,6 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Sleek Category Card 3D Lift */
     .portal-card {
       transform-style: preserve-3d;
       perspective: 1000px;
@@ -165,13 +159,23 @@
       transform: translateY(-8px) scale(1.02);
     }
 
-    /* Subtle Pattern Background Overlay */
     .bg-grid-pattern {
       background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 24px 24px;
     }
     .light .bg-grid-pattern {
       background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    }
+
+    /* Skeleton Loading Effect */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.15) 37%, rgba(255,255,255,0.05) 63%);
+      background-size: 400% 100%;
+      animation: skeleton-loading 1.4s ease infinite;
+    }
+    @keyframes skeleton-loading {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0 50%; }
     }
   </style>
 </head>
@@ -181,6 +185,7 @@
   <div class="ambient-orb-1"></div>
   <div class="ambient-orb-2"></div>
 
+  <!-- HEADER NAVBAR -->
   <header class="sticky top-0 z-50 glass-nav w-full">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-20 flex items-center justify-between gap-2">
       
@@ -202,26 +207,42 @@
         </div>
       </div>
 
-      <!-- Live Server Indicator & Controls -->
-      <div class="flex items-center gap-1 sm:gap-2.5 flex-shrink-0">
-        <!-- Live Gateway Status Pill -->
-        <div class="hidden lg:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide shadow-sm">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span>Gateway Active (4K)</span>
-        </div>
+      <!-- Quick Nav Buttons & Controls -->
+      <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        <!-- Live Chat Quick Button -->
+        <button 
+          onclick="document.getElementById('live-chat-section').scrollIntoView({behavior: 'smooth'})"
+          class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-200/80 dark:bg-slate-900 hover:bg-brand-orange/20 text-slate-800 dark:text-slate-200 hover:text-brand-orange border border-slate-300 dark:border-slate-800 text-[11px] sm:text-xs font-bold transition shadow-sm"
+          title="Buka Live Chat Komunitas"
+        >
+          <i class="fa-solid fa-comments text-brand-orange"></i>
+          <span class="hidden lg:inline">Live Chat</span>
+        </button>
 
-        <!-- AI Assistant Quick Jump Button -->
+        <!-- Leaderboard Quick Button -->
+        <button 
+          onclick="document.getElementById('leaderboard-section').scrollIntoView({behavior: 'smooth'})"
+          class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-200/80 dark:bg-slate-900 hover:bg-brand-gold/20 text-slate-800 dark:text-slate-200 hover:text-brand-gold border border-slate-300 dark:border-slate-800 text-[11px] sm:text-xs font-bold transition shadow-sm"
+          title="Lihat Peringkat Pengguna"
+        >
+          <i class="fa-solid fa-trophy text-brand-gold"></i>
+          <span class="hidden lg:inline">Leaderboard</span>
+        </button>
+
+        <!-- AI Assistant Jump Button -->
         <button 
           onclick="document.getElementById('ai-media-hub').scrollIntoView({behavior: 'smooth'})"
           class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-brand-cyan/20 to-brand-purple/20 hover:from-brand-cyan/30 hover:to-brand-purple/30 border border-brand-cyan/40 text-brand-cyan text-[11px] sm:text-xs font-bold transition shadow-sm"
           title="Rayliziie AI Assistant"
         >
           <i class="fa-solid fa-wand-magic-sparkles text-[11px] sm:text-xs animate-pulse"></i>
-          <span class="text-[11px] sm:text-xs">AI Assistant</span>
+          <span class="hidden sm:inline">AI Studio</span>
         </button>
+
+        <!-- User Profile / Auth Button -->
+        <div id="user-nav-container">
+          <!-- Rendered dynamically by JS -->
+        </div>
 
         <!-- Audio FX Toggle -->
         <button 
@@ -247,15 +268,14 @@
     </div>
   </header>
 
-  <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8 z-10 relative overflow-x-hidden">
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-10 z-10 relative overflow-x-hidden">
     
     <!-- HERO SPOTLIGHT BANNER -->
     <section class="glass-card rounded-xl sm:rounded-3xl p-3.5 sm:p-8 border border-slate-200 dark:border-slate-800/80 shadow-xl relative overflow-hidden">
-      <!-- Decorative Backdrop Glow -->
       <div class="absolute -right-20 -top-20 w-80 h-80 bg-gradient-to-br from-brand-cyan/20 to-brand-orange/20 rounded-full blur-3xl pointer-events-none"></div>
       
       <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-8 relative z-10">
-        <!-- Logo Showcase Frame -->
         <div class="w-full lg:w-5/12 flex justify-center">
           <div class="relative group w-full max-w-xs sm:max-w-sm">
             <div class="absolute -inset-1 bg-gradient-to-r from-brand-cyan via-brand-purple to-brand-orange rounded-2xl sm:rounded-3xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
@@ -274,7 +294,6 @@
           </div>
         </div>
 
-        <!-- Corporate Overview & Description -->
         <div class="w-full lg:w-7/12 space-y-2.5 sm:space-y-4 text-center lg:text-left">
           <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-orange/10 border border-brand-orange/30 text-brand-orange text-[9px] sm:text-xs font-extrabold tracking-widest uppercase">
             <i class="fa-solid fa-sparkles text-[10px]"></i> Profil & Kepatuhan Resmi
@@ -289,7 +308,6 @@
             Penyedia layanan media Over-The-Top (OTT) dan platform penyiaran digital terintegrasi. Kami menghadirkan tayangan Video-on-Demand (VOD) dan Live Streaming beresolusi tinggi <strong class="text-slate-900 dark:text-white font-bold">(HD / 4K Ultra)</strong> dengan dukungan jaringan server berlatensi rendah untuk pengalaman menonton tingkat global.
           </p>
 
-          <!-- Key Highlights Badges -->
           <div class="pt-1 flex flex-wrap items-center justify-center lg:justify-start gap-1.5 sm:gap-2.5">
             <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-[10px] sm:text-xs font-semibold">
               <i class="fa-solid fa-bolt text-brand-orange"></i> Ultra Latency Server
@@ -315,7 +333,6 @@
           <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pilih kategori tayangan favorit Anda untuk membuka situs tujuan secara langsung.</p>
         </div>
         
-        <!-- Subtle Search Filter -->
         <div class="relative w-full sm:w-56">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
           <input 
@@ -328,7 +345,7 @@
         </div>
       </div>
 
-      <!-- 6 Luxury Category Cards Grid (Mobile 2 Columns) -->
+      <!-- 6 Category Cards Grid -->
       <div id="category-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-5">
         
         <!-- CARD 1: ANIME -->
@@ -341,9 +358,14 @@
             <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-brand-orange/20 to-amber-500/10 border border-brand-orange/30 flex items-center justify-center text-brand-orange text-sm sm:text-xl group-hover:scale-110 transition-transform shadow-sm">
               <i class="fa-solid fa-dragon"></i>
             </div>
-            <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/30 tracking-wider uppercase">
-              4K ULTRA
-            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleBookmark('Anime', event)" class="p-1 text-slate-400 hover:text-brand-gold transition" title="Simpan Bookmark">
+                <i id="bm-icon-Anime" class="fa-regular fa-bookmark"></i>
+              </button>
+              <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/30 tracking-wider uppercase">
+                4K ULTRA
+              </span>
+            </div>
           </div>
 
           <div class="mt-2 sm:mt-4 relative z-10">
@@ -372,9 +394,14 @@
             <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-brand-red/20 to-rose-500/10 border border-brand-red/30 flex items-center justify-center text-brand-red text-sm sm:text-xl group-hover:scale-110 transition-transform shadow-sm">
               <i class="fa-solid fa-heart"></i>
             </div>
-            <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-red/10 text-brand-red border border-brand-red/30 tracking-wider uppercase">
-              VIP ACCESS
-            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleBookmark('Dracin', event)" class="p-1 text-slate-400 hover:text-brand-gold transition" title="Simpan Bookmark">
+                <i id="bm-icon-Dracin" class="fa-regular fa-bookmark"></i>
+              </button>
+              <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-red/10 text-brand-red border border-brand-red/30 tracking-wider uppercase">
+                VIP ACCESS
+              </span>
+            </div>
           </div>
 
           <div class="mt-2 sm:mt-4 relative z-10">
@@ -403,9 +430,14 @@
             <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-brand-purple/20 to-indigo-500/10 border border-brand-purple/30 flex items-center justify-center text-brand-purple text-sm sm:text-xl group-hover:scale-110 transition-transform shadow-sm">
               <i class="fa-solid fa-masks-theater"></i>
             </div>
-            <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-purple/10 text-brand-purple border border-brand-purple/30 tracking-wider uppercase">
-              TRENDING #1
-            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleBookmark('Drakor', event)" class="p-1 text-slate-400 hover:text-brand-gold transition" title="Simpan Bookmark">
+                <i id="bm-icon-Drakor" class="fa-regular fa-bookmark"></i>
+              </button>
+              <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-purple/10 text-brand-purple border border-brand-purple/30 tracking-wider uppercase">
+                TRENDING #1
+              </span>
+            </div>
           </div>
 
           <div class="mt-2 sm:mt-4 relative z-10">
@@ -434,9 +466,14 @@
             <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-brand-emerald/20 to-teal-500/10 border border-brand-emerald/30 flex items-center justify-center text-brand-emerald text-sm sm:text-xl group-hover:scale-110 transition-transform shadow-sm">
               <i class="fa-solid fa-khanda"></i>
             </div>
-            <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/30 tracking-wider uppercase">
-              60 FPS
-            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleBookmark('Donghua', event)" class="p-1 text-slate-400 hover:text-brand-gold transition" title="Simpan Bookmark">
+                <i id="bm-icon-Donghua" class="fa-regular fa-bookmark"></i>
+              </button>
+              <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-emerald/10 text-brand-emerald border border-brand-emerald/30 tracking-wider uppercase">
+                60 FPS
+              </span>
+            </div>
           </div>
 
           <div class="mt-2 sm:mt-4 relative z-10">
@@ -465,9 +502,14 @@
             <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-brand-cyan/20 to-blue-500/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan text-sm sm:text-xl group-hover:scale-110 transition-transform shadow-sm">
               <i class="fa-solid fa-book-open"></i>
             </div>
-            <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/30 tracking-wider uppercase">
-              READER
-            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleBookmark('Komik', event)" class="p-1 text-slate-400 hover:text-brand-gold transition" title="Simpan Bookmark">
+                <i id="bm-icon-Komik" class="fa-regular fa-bookmark"></i>
+              </button>
+              <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/30 tracking-wider uppercase">
+                READER
+              </span>
+            </div>
           </div>
 
           <div class="mt-2 sm:mt-4 relative z-10">
@@ -496,9 +538,14 @@
             <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-rose-600/20 to-red-500/10 border border-rose-500/30 flex items-center justify-center text-rose-500 text-sm sm:text-xl group-hover:scale-110 transition-transform shadow-sm">
               <i class="fa-solid fa-film"></i>
             </div>
-            <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/30 tracking-wider uppercase">
-              DOLBY
-            </span>
+            <div class="flex items-center gap-1">
+              <button onclick="toggleBookmark('Films', event)" class="p-1 text-slate-400 hover:text-brand-gold transition" title="Simpan Bookmark">
+                <i id="bm-icon-Films" class="fa-regular fa-bookmark"></i>
+              </button>
+              <span class="text-[8px] sm:text-[10px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/30 tracking-wider uppercase">
+                DOLBY
+              </span>
+            </div>
           </div>
 
           <div class="mt-2 sm:mt-4 relative z-10">
@@ -520,9 +567,145 @@
       </div>
     </section>
 
-    <!-- RAYLIZIIE AI MEDIA HUB (POWERED BY GEMINI AI) -->
+    <!-- REALTIME LIVE CHAT COMMUNITY SECTION -->
+    <section id="live-chat-section" class="glass-card rounded-xl sm:rounded-3xl p-3.5 sm:p-8 border border-brand-orange/30 shadow-xl space-y-3.5 sm:space-y-6 relative overflow-hidden">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-orange/10 border border-brand-orange/30 text-brand-orange text-[9px] sm:text-xs font-extrabold tracking-widest uppercase mb-1">
+            <i class="fa-solid fa-comments animate-bounce"></i> Komunitas Streamer
+          </div>
+          <h3 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white flex items-center gap-2">
+            Rayliziie Realtime Live Chat
+          </h3>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Diskusi seputar anime, drakor, film, dan komik favorit. Kirim pesan untuk mendapatkan +15 XP!</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-emerald-500">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="chat-online-count">12 Online</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pinned Message Banner -->
+      <div id="pinned-message-box" class="p-2.5 sm:p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-brand-orange/10 to-transparent border border-brand-orange/40 text-xs flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 text-brand-orange font-semibold">
+          <i class="fa-solid fa-thumbtack text-sm flex-shrink-0 animate-pulse"></i>
+          <span id="pinned-message-text" class="text-[11px] sm:text-xs">🔥 Selamat datang di PT. Rayliziie Official Live Chat! Jaga kesopanan dan nikmati pengalaman streaming.</span>
+        </div>
+        <button onclick="unpinMessage()" id="unpin-btn" class="hidden text-[10px] text-rose-400 hover:underline flex-shrink-0">
+          Unpin
+        </button>
+      </div>
+
+      <!-- Main Chat Messages Display Window -->
+      <div id="chat-messages-container" class="h-64 sm:h-80 overflow-y-auto p-3 bg-slate-100/90 dark:bg-slate-950/90 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-inner">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Attachment Preview (Image upload) -->
+      <div id="image-upload-preview-container" class="hidden relative inline-block">
+        <img id="image-upload-preview" src="" alt="Upload Preview" class="h-16 w-auto rounded-lg border border-brand-cyan shadow">
+        <button onclick="clearImageUpload()" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center shadow">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Emoji Picker Dropdown Box -->
+      <div id="emoji-picker-box" class="hidden p-2.5 bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl grid grid-cols-8 sm:grid-cols-10 gap-1.5 text-base sm:text-xl">
+        <button onclick="addEmoji('🔥')" class="hover:scale-125 transition">🔥</button>
+        <button onclick="addEmoji('❤️')" class="hover:scale-125 transition">❤️</button>
+        <button onclick="addEmoji('😂')" class="hover:scale-125 transition">😂</button>
+        <button onclick="addEmoji('🎉')" class="hover:scale-125 transition">🎉</button>
+        <button onclick="addEmoji('😎')" class="hover:scale-125 transition">😎</button>
+        <button onclick="addEmoji('🍿')" class="hover:scale-125 transition">🍿</button>
+        <button onclick="addEmoji('✨')" class="hover:scale-125 transition">✨</button>
+        <button onclick="addEmoji('👍')" class="hover:scale-125 transition">👍</button>
+        <button onclick="addEmoji('😱')" class="hover:scale-125 transition">😱</button>
+        <button onclick="addEmoji('👑')" class="hover:scale-125 transition">👑</button>
+      </div>
+
+      <!-- Chat Input Controls Form -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button 
+          onclick="toggleEmojiPicker()" 
+          class="px-2.5 sm:px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-brand-orange text-xs sm:text-sm font-bold transition flex-shrink-0"
+          title="Pilih Emoji"
+        >
+          😊
+        </button>
+
+        <label 
+          class="px-2.5 sm:px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-brand-cyan text-xs sm:text-sm font-bold cursor-pointer transition flex-shrink-0"
+          title="Upload Gambar"
+        >
+          <i class="fa-solid fa-image"></i>
+          <input type="file" id="chat-file-input" accept="image/*" onchange="handleImageFileSelect(event)" class="hidden">
+        </label>
+
+        <input 
+          type="text" 
+          id="chat-input-text"
+          onkeypress="if(event.key === 'Enter') sendChatMessage()"
+          placeholder="Ketik pesan komunitas... (XP +15)"
+          class="flex-grow bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-brand-orange transition shadow-inner"
+        />
+
+        <button 
+          onclick="sendChatMessage()"
+          class="px-3.5 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-brand-orange to-amber-500 hover:opacity-90 text-white font-extrabold text-xs uppercase tracking-wider transition shadow-glow-orange flex items-center justify-center gap-1 flex-shrink-0"
+        >
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+          <span class="hidden sm:inline">Kirim</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- LEADERBOARD & USER RANKING SECTION -->
+    <section id="leaderboard-section" class="glass-card rounded-xl sm:rounded-3xl p-3.5 sm:p-8 border border-brand-gold/30 shadow-xl space-y-3.5 sm:space-y-6 relative overflow-hidden">
+      
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-[9px] sm:text-xs font-extrabold tracking-widest uppercase mb-1">
+            <i class="fa-solid fa-trophy"></i> Hall of Fame
+          </div>
+          <h3 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white flex items-center gap-2">
+            Leaderboard Top Streamer
+          </h3>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Peringkat pengguna teratas berdasarkan total poin XP dan keaktifan di platform.</p>
+        </div>
+
+        <button onclick="renderLeaderboard()" class="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[10px] sm:text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-brand-gold transition">
+          <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+        </button>
+      </div>
+
+      <!-- Leaderboard Table Container -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-slate-800 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+              <th class="py-2.5 px-3">Rank</th>
+              <th class="py-2.5 px-3">Pengguna</th>
+              <th class="py-2.5 px-3">Gelar / Rank</th>
+              <th class="py-2.5 px-3">Level</th>
+              <th class="py-2.5 px-3">Total XP</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-table-body" class="divide-y divide-slate-200 dark:divide-slate-800/60 font-medium">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- RAYLIZIIE AI MEDIA HUB (GEMINI AI) -->
     <section id="ai-media-hub" class="glass-card rounded-xl sm:rounded-3xl p-3.5 sm:p-8 border border-brand-purple/30 shadow-xl space-y-4 sm:space-y-6 relative overflow-hidden">
-      <!-- Header Section -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-slate-200 dark:border-slate-800/80 pb-3 sm:pb-4 relative z-10">
         <div>
           <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-brand-cyan/20 to-brand-purple/20 border border-brand-cyan/30 text-brand-cyan text-[9px] sm:text-xs font-extrabold tracking-widest uppercase mb-1">
@@ -531,10 +714,9 @@
           <h3 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white flex items-center gap-2">
             Rayliziie AI Smart Assistant & Studio
           </h3>
-          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cari rekomendasi tontonan impian Anda, sinopsis suara, atau buat poster AI.</p>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cari rekomendasi tontonan impian Anda, sinopsis suara, atau buat poster AI (XP +20).</p>
         </div>
 
-        <!-- Mode Switcher Tabs for AI Hub -->
         <div class="flex items-center bg-slate-200/80 dark:bg-slate-900 p-1 rounded-xl border border-slate-300 dark:border-slate-800 w-full sm:w-auto">
           <button 
             id="ai-tab-chat-btn" 
@@ -555,8 +737,6 @@
 
       <!-- TAB 1: AI RECOMMENDATION & CHAT -->
       <div id="ai-tab-chat" class="space-y-3 sm:space-y-4 relative z-10">
-        
-        <!-- Quick Prompts Chips -->
         <div class="space-y-1.5">
           <label class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
             <i class="fa-solid fa-bolt text-brand-orange"></i> Ide Pencarian Cepat:
@@ -577,7 +757,6 @@
           </div>
         </div>
 
-        <!-- Input Form & Controls -->
         <div class="space-y-2.5">
           <div class="relative">
             <textarea 
@@ -588,7 +767,6 @@
             ></textarea>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 mt-2">
-              <!-- Google Search Grounding Toggle -->
               <label class="flex items-center gap-2 cursor-pointer text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-brand-cyan/40 transition">
                 <input type="checkbox" id="ai-grounding-toggle" class="rounded accent-brand-cyan w-3.5 h-3.5 flex-shrink-0" checked>
                 <span class="flex items-center gap-1 leading-tight">
@@ -596,7 +774,6 @@
                 </span>
               </label>
 
-              <!-- Submit Button -->
               <button 
                 id="ai-submit-btn" 
                 onclick="askGeminiAi()"
@@ -615,7 +792,6 @@
               <i class="fa-solid fa-sparkles text-xs"></i> Hasil Rekomendasi AI
             </div>
             
-            <!-- TTS Button -->
             <button 
               id="tts-play-btn"
               onclick="speakAiResponse()" 
@@ -626,10 +802,8 @@
             </button>
           </div>
 
-          <!-- Text Body -->
           <div id="ai-response-text" class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-sans whitespace-pre-wrap break-words"></div>
 
-          <!-- Citations Container -->
           <div id="ai-sources-container" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
             <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
               <i class="fa-solid fa-link text-brand-cyan text-[10px]"></i> Sumber Informasi:
@@ -664,7 +838,6 @@
           </button>
         </div>
 
-        <!-- Generated Image Result -->
         <div id="imagen-result-container" class="hidden flex flex-col items-center justify-center p-4 bg-slate-100/80 dark:bg-slate-950/90 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
           <img id="imagen-output-img" src="" alt="AI Generated Poster" class="max-w-xs w-full h-auto rounded-lg shadow-xl border border-slate-800 mb-3 object-cover">
           <a id="imagen-download-btn" download="rayliziie-ai-poster.png" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold transition flex items-center gap-1.5">
@@ -676,44 +849,40 @@
     </section>
 
     <!-- LEGAL & COMPLIANCE SECTION -->
-    <section class="glass-card rounded-3xl p-8 sm:p-10 border border-slate-200 dark:border-slate-800/80 shadow-2xl space-y-8 relative overflow-hidden">
-      <!-- Ambient Glow Decorative -->
+    <section class="glass-card rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800/80 shadow-2xl space-y-6 relative overflow-hidden">
       <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-brand-cyan/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="text-center space-y-1">
-        <h3 class="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">Lisensi & Kepatuhan Hukum</h3>
+        <h3 class="font-display font-black text-xl sm:text-3xl text-slate-900 dark:text-white">Lisensi & Kepatuhan Hukum</h3>
         <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Sertifikasi resmi operasional penyiaran media digital PT. Rayliziie Official</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Card Legal 1 -->
-        <div class="p-6 bg-slate-100/70 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2 hover:border-brand-cyan/40 transition">
-          <div class="w-10 h-10 rounded-xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan text-lg">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div class="p-5 bg-slate-100/70 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2 hover:border-brand-cyan/40 transition">
+          <div class="w-9 h-9 rounded-xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan text-base">
             <i class="fa-solid fa-file-contract"></i>
           </div>
-          <h4 class="font-bold text-base text-slate-900 dark:text-white">NIB & Perizinan ResmI</h4>
+          <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">NIB & Perizinan Resmi</h4>
           <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             Terdaftar di OSS (KBLI 60102 & 63122) sebagai platform digital dan penyiaran komersial yang diakui secara legal.
           </p>
         </div>
 
-        <!-- Card Legal 2 -->
-        <div class="p-6 bg-slate-100/70 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2 hover:border-brand-orange/40 transition">
-          <div class="w-10 h-10 rounded-xl bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-brand-orange text-lg">
+        <div class="p-5 bg-slate-100/70 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2 hover:border-brand-orange/40 transition">
+          <div class="w-9 h-9 rounded-xl bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-brand-orange text-base">
             <i class="fa-solid fa-copyright"></i>
           </div>
-          <h4 class="font-bold text-base text-slate-900 dark:text-white">Hak Cipta (HAKI)</h4>
+          <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Hak Cipta (HAKI)</h4>
           <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             Lisensi penayangan Direct-to-Consumer (D2C) resmi dari rumah produksi mitra secara eksklusif.
           </p>
         </div>
 
-        <!-- Card Legal 3 -->
-        <div class="p-6 bg-slate-100/70 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2 hover:border-brand-emerald/40 transition">
-          <div class="w-10 h-10 rounded-xl bg-brand-emerald/10 border border-brand-emerald/30 flex items-center justify-center text-brand-emerald text-lg">
+        <div class="p-5 bg-slate-100/70 dark:bg-slate-950/70 rounded-2xl border border-slate-200 dark:border-slate-800/80 space-y-2 hover:border-brand-emerald/40 transition">
+          <div class="w-9 h-9 rounded-xl bg-brand-emerald/10 border border-brand-emerald/30 flex items-center justify-center text-brand-emerald text-base">
             <i class="fa-solid fa-shield-halved"></i>
           </div>
-          <h4 class="font-bold text-base text-slate-900 dark:text-white">Keamanan & DRM Data</h4>
+          <h4 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white">Keamanan & DRM Data</h4>
           <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
             Tersertifikasi ISO/IEC 27001, enkripsi SSL/TLS 256-bit, dan proteksi konten DRM anti-pembajakan.
           </p>
@@ -723,10 +892,227 @@
 
   </main>
 
+  <!-- MODALS CONTAINER -->
+  
+  <!-- MODAL 1: AUTH / LOGIN MODAL -->
+  <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-3">
+    <div class="glass-card bg-slate-900 text-white rounded-3xl max-w-md w-full p-5 sm:p-6 border border-slate-800 shadow-2xl relative space-y-4">
+      <button onclick="closeModal('auth-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-user-lock"></i>
+        </div>
+        <h3 class="font-display font-black text-xl">Masuk Akun Rayliziie</h3>
+        <p class="text-xs text-slate-400">Pilih mode masuk terdaftar, mode anonim, atau login Owner.</p>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Username Pengguna</label>
+          <input type="text" id="login-username" placeholder="Masukkan nama Anda..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-cyan">
+        </div>
+
+        <div>
+          <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Kode Rahasia / Password (Opsional)</label>
+          <input type="password" id="login-passcode" placeholder="Masukkan kode rahasia jika ada..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-cyan">
+        </div>
+
+        <button onclick="handleUserLogin()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue font-black text-slate-950 text-xs uppercase tracking-wider shadow-glow-cyan">
+          <i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Sekarang
+        </button>
+
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-slate-800"></div>
+          <span class="flex-shrink mx-2 text-[10px] text-slate-500 font-bold uppercase">atau</span>
+          <div class="flex-grow border-t border-slate-800"></div>
+        </div>
+
+        <button onclick="handleAnonymousLogin()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
+          <i class="fa-solid fa-user-secret mr-1"></i> Masuk sebagai Anonim (Tamu)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: USER PROFILE DASHBOARD MODAL -->
+  <div id="profile-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-3">
+    <div class="glass-card bg-slate-900 text-white rounded-3xl max-w-2xl w-full p-5 sm:p-7 border border-slate-800 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal('profile-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Profile Header -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 border-b border-slate-800 pb-5">
+        <div class="relative">
+          <img id="prof-avatar-img" src="" alt="Avatar" class="w-20 h-20 rounded-2xl object-cover border-2 border-brand-cyan shadow-lg">
+          <span id="prof-owner-badge" class="hidden absolute -bottom-2 -right-2 bg-gradient-to-r from-amber-500 to-brand-orange text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow border border-amber-300">
+            👑 OWNER
+          </span>
+        </div>
+
+        <div class="space-y-1 text-center sm:text-left flex-grow">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <h3 id="prof-username-text" class="font-display font-black text-xl text-white">Guest User</h3>
+            <span id="prof-rank-badge" class="px-2.5 py-0.5 rounded-full bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-[10px] font-extrabold tracking-wider uppercase">
+              Streamer Bronze
+            </span>
+          </div>
+          <p id="prof-user-id" class="text-[11px] text-slate-400 font-mono">ID: usr-000000</p>
+
+          <!-- Level & XP Bar -->
+          <div class="space-y-1 pt-1 max-w-md">
+            <div class="flex items-center justify-between text-[10px] font-bold text-slate-300">
+              <span id="prof-level-text"><i class="fa-solid fa-layer-group text-brand-orange"></i> Level 1</span>
+              <span id="prof-xp-text">0 / 100 XP</span>
+            </div>
+            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div id="prof-xp-progress" class="bg-gradient-to-r from-brand-orange via-amber-400 to-brand-gold h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logout & Owner Panel Quick Access -->
+        <div class="flex flex-col gap-2 w-full sm:w-auto">
+          <button id="prof-owner-btn" onclick="openOwnerPanel()" class="hidden px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-brand-orange text-white text-xs font-black shadow-glow-orange flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-crown"></i> Panel Owner
+          </button>
+          <button onclick="logoutUser()" class="px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-400 text-xs font-bold transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs Profile -->
+      <div class="flex border-b border-slate-800 text-xs font-bold">
+        <button onclick="switchProfileTab('bookmarks')" id="prof-tab-bm" class="px-4 py-2 border-b-2 border-brand-cyan text-brand-cyan">
+          <i class="fa-solid fa-bookmark mr-1"></i> Bookmark Tersimpan
+        </button>
+        <button onclick="switchProfileTab('activity')" id="prof-tab-act" class="px-4 py-2 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-clock-rotate-left mr-1"></i> Riwayat Aktivitas
+        </button>
+      </div>
+
+      <!-- Bookmarks List -->
+      <div id="prof-bookmarks-container" class="space-y-2">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Activity History List -->
+      <div id="prof-activity-container" class="hidden space-y-2 max-h-48 overflow-y-auto">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: OWNER CONTROL PANEL MODAL -->
+  <div id="owner-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-3">
+    <div class="glass-card bg-slate-900 text-white rounded-3xl max-w-3xl w-full p-5 sm:p-7 border border-amber-500/40 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal('owner-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-brand-orange text-white flex items-center justify-center text-xl shadow-glow-orange">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <div>
+          <h3 class="font-display font-black text-xl text-white">Panel Kontrol Owner Resmi</h3>
+          <p class="text-xs text-slate-400">Kelola data pengguna, atur XP/Level, moderator chat, dan status sistem.</p>
+        </div>
+      </div>
+
+      <!-- Owner Actions Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- User Control Box -->
+        <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
+          <h4 class="font-bold text-xs text-brand-orange uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-users-gear"></i> Kontrol Pengguna & XP
+          </h4>
+
+          <div class="space-y-2 text-xs">
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Pilih Pengguna:</label>
+              <select id="owner-user-select" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white">
+                <!-- Rendered by JS -->
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] text-slate-400 block mb-1">Tambah/Kurang XP:</label>
+                <input type="number" id="owner-xp-amount" value="50" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white">
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-400 block mb-1">Set Level Langsung:</label>
+                <input type="number" id="owner-level-amount" value="5" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white">
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button onclick="ownerAddXp()" class="flex-1 py-1.5 rounded-xl bg-brand-cyan text-slate-950 font-black text-[11px]">
+                <i class="fa-solid fa-plus mr-1"></i> Update XP
+              </button>
+              <button onclick="ownerSetLevel()" class="flex-1 py-1.5 rounded-xl bg-brand-gold text-slate-950 font-black text-[11px]">
+                <i class="fa-solid fa-shield-halved mr-1"></i> Set Level
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Moderation Box -->
+        <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
+          <h4 class="font-bold text-xs text-brand-cyan uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-cat"></i> Moderasi Live Chat
+          </h4>
+
+          <div class="space-y-2 text-xs">
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Ubah Pesan Terpin (Pinned Text):</label>
+              <input type="text" id="owner-pin-input" placeholder="Ketik pengumuman baru..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white">
+            </div>
+
+            <button onclick="ownerUpdatePinText()" class="w-full py-1.5 rounded-xl bg-brand-orange text-white font-bold text-[11px]">
+              <i class="fa-solid fa-thumbtack mr-1"></i> Perbarui Pin Chat
+            </button>
+
+            <button onclick="ownerClearAllChat()" class="w-full py-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 font-bold text-[11px] hover:bg-rose-500/30 transition">
+              <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Semua Chat
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Registered Users Overview Table -->
+      <div class="space-y-2">
+        <h4 class="font-bold text-xs text-slate-300 uppercase tracking-wider">Daftar Pengguna Terdaftar</h4>
+        <div class="max-h-36 overflow-y-auto border border-slate-800 rounded-xl">
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-2">User</th>
+                <th class="p-2">Role</th>
+                <th class="p-2">Level</th>
+                <th class="p-2">XP</th>
+                <th class="p-2 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="owner-user-table-body" class="divide-y divide-slate-800/60">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="bg-white/80 dark:bg-slate-950/90 border-t border-slate-200 dark:border-slate-800/80 py-8 text-slate-500 dark:text-slate-400 text-xs relative z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-      
       <div class="flex items-center gap-3">
         <img src="https://files.catbox.moe/0s28hy.png" alt="Footer Logo" class="h-7 w-auto filter drop-shadow opacity-90">
         <span class="text-slate-600 dark:text-slate-400 font-medium">© 2026 PT. Rayliziie Official. Hak Cipta & Lisensi D2C Dilindungi Hukum.</span>
@@ -738,72 +1124,183 @@
         <a href="#" class="hover:text-brand-orange transition"><i class="fa-brands fa-youtube"></i></a>
         <a href="#" class="hover:text-brand-orange transition"><i class="fa-brands fa-telegram"></i></a>
       </div>
-
     </div>
   </footer>
 
-  <!-- SCRIPT LOGIC -->
+  <!-- SCRIPT LOGIC & STATE MANAGEMENT -->
   <script>
+    // Config Supabase Client
+    const SUPABASE_URL = 'https://xjmmhajcchoizjbatbqb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqbW1oYWpjY2hvaXpqYmF0YnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNjA5OTgsImV4cCI6MjA5ODgzNjk5OH0.CM-1fZoz1u4kMOli6DBlQNPKIpcc1HWowKJjZIBpooc';
+    
+    let supabaseClient = null;
+    
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      try {
+        if (window.supabase) {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+      } catch (e) {
+        console.error("Koneksi Supabase Gagal:", e);
+      }
+    }
+
     // =========================================================================
-    // KONFIGURASI LINK KATEGORI (HANYA DIUBAH OLEH PEMILIK DI DALAM KODE INI)
-    // Masukkan link URL website tujuan Anda di dalam tanda petik '' di bawah ini:
+    // KONFIGURASI LINK KATEGORI (DIISI OLEH OWNER/PEMILIK)
     // =========================================================================
     const CATEGORY_URLS = {
       'Anime': '',    // Contoh: 'https://nama-web-anime.com'
-      'Dracin': '',   // Contoh: 'https://nama-web-dracin.com'
+      'Dracin': 'https://streamingrayliziieofficial.netlify.app',   // Contoh: 'https://nama-web-dracin.com'
       'Drakor': '',   // Contoh: 'https://nama-web-drakor.com'
       'Donghua': '',  // Contoh: 'https://nama-web-donghua.com'
       'Komik': '',    // Contoh: 'https://nama-web-komik.com'
       'Films': ''     // Contoh: 'https://nama-web-films.com'
     };
 
+    // SYSTEM STATE
     let soundEnabled = true;
     let audioCtx = null;
 
-    // Database Rekomendasi Cerdas Lokal (Garda Depan & Fallback Pintar)
+    // USER & DATABASE STATE (LocalStorage persistent)
+    let currentUser = JSON.parse(localStorage.getItem('ray_current_user')) || {
+      id: 'usr-guest-' + Math.floor(1000 + Math.random() * 9000),
+      username: 'Streamer_' + Math.floor(100 + Math.random() * 900),
+      role: 'user', // 'user' or 'owner'
+      isAnonymous: true,
+      level: 1,
+      xp: 0,
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Guest'
+    };
+
+    let usersList = JSON.parse(localStorage.getItem('ray_users_list')) || [
+      { id: 'usr-owner-001', username: 'PT. Rayliziie Admin', role: 'owner', isAnonymous: false, level: 99, xp: 9990, avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=RayliziieAdmin' },
+      { id: 'usr-101', username: 'Kaito_Anime', role: 'user', isAnonymous: false, level: 12, xp: 1240, avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Kaito' },
+      { id: 'usr-102', username: 'DrakorLover', role: 'user', isAnonymous: false, level: 8, xp: 820, avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Drakor' },
+      { id: 'usr-103', username: 'ManhwaHunter', role: 'user', isAnonymous: false, level: 5, xp: 510, avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Hunter' }
+    ];
+
+    let chatMessages = JSON.parse(localStorage.getItem('ray_chat_messages')) || [
+      { id: 1, userId: 'usr-owner-001', username: 'PT. Rayliziie Admin', role: 'owner', text: 'Selamat datang di Rayliziie Official Gateway! Nikmati tayangan kualiatas HD/4K.', time: '21:00', image: null },
+      { id: 2, userId: 'usr-101', username: 'Kaito_Anime', role: 'user', text: 'Solo Leveling season baru seru banget guys! 🔥', time: '21:02', image: null },
+      { id: 3, userId: 'usr-102', username: 'DrakorLover', role: 'user', text: 'Ada rekomendasi drakor romantis rating tinggi?', time: '21:05', image: null }
+    ];
+
+    let pinnedMessageText = localStorage.getItem('ray_pinned_msg') || '🔥 Selamat datang di PT. Rayliziie Official Live Chat! Jaga kesopanan dan nikmati pengalaman streaming.';
+    let bookmarks = JSON.parse(localStorage.getItem('ray_bookmarks')) || [];
+    let activityHistory = JSON.parse(localStorage.getItem('ray_activities')) || [
+      { text: 'Membuat akun streamer baru', time: new Date().toLocaleTimeString() }
+    ];
+    let selectedImageBase64 = null;
+
+    // Database Rekomendasi Cerdas Lokal
     const SMART_RECOMMENDATION_DATABASE = {
       anime: [
         "1. Solo Leveling Season 2 (Arise from the Shadows)\n   - Genre: Action, Fantasy, Overpower\n   - Rating: 9.2/10\n   - Alasan Nonton: Animasi pertarungan Sung Jin-woo yang luar biasa dengan efek visual memukau.",
         "2. Demon Slayer: Kimetsu no Yaiba - Infinity Castle Arc\n   - Genre: Supernatural, Dark Fantasy\n   - Rating: 9.4/10\n   - Alasan Nonton: Klimaks perang akhir Korps Pemburu Iblis melawan Muzan Kibutsuji dalam kualitas 4K Ultra HD.",
-        "3. Jujutsu Kaisen Culling Game\n   - Genre: Action, Sorcery\n   - Rating: 9.0/10\n   - Alasan Nonton: Pertempuran sihir tingkat tinggi dengan intrik taktik dan aksi nonstop khas Studio MAPPA."
+        "3. Jujutsu Kaisen Culling Game\n   - Genre: Action, Sorcery\n   - Rating: 9.0/10\n   - Alasan Nonton: Pertempuran sihir tingkat tinggi dengan alur cepat khas Studio MAPPA."
       ],
       drakor: [
         "1. Queen of Tears\n   - Genre: Romance, Drama, Comedy\n   - Rating: 9.3/10\n   - Alasan Nonton: Alur cerita emosional tentang pernikahan pasangan konglomerat dengan akting memukau Kim Soo-hyun & Kim Ji-won.",
-        "2. Lovely Runner\n   - Genre: Time Travel, Youth Romance\n   - Rating: 9.1/10\n   - Alasan Nonton: Kisah perjalanan waktu manis penuh kejutan misteri yang bikin penasaran di tiap episode.",
-        "3. All of Us Are Dead Season 2\n   - Genre: Zombie Thriller, Survival\n   - Rating: 8.9/10\n   - Alasan Nonton: Ketegangan penuh aksi para penyintas bertahan hidup dari ancaman mutan baru."
+        "2. Lovely Runner\n   - Genre: Time Travel, Youth Romance\n   - Rating: 9.1/10\n   - Alasan Nonton: Kisah perjalanan waktu manis penuh kejutan misteri di tiap episode."
       ],
       dracin: [
-        "1. Love Between Fairy and Devil (蒼蘭訣)\n   - Genre: Xianxia, Romance, Fantasy\n   - Rating: 9.2/10\n   - Alasan Nonton: Efek CGI spektakuler bertema iblis kuno Dongfang Qingcang dan anggrek suci Xiao Lanhua.",
-        "2. Hidden Love (偷偷藏不住)\n   - Genre: Modern Romance, Youth\n   - Rating: 9.0/10\n   - Alasan Nonton: Drama romantis modern yang hangat dan bikin baper antara Sang Zhi dan Duan Jiaxu.",
-        "3. The Double (墨雨雲間)\n   - Genre: Historical Revenge, Mystery\n   - Rating: 8.9/10\n   - Alasan Nonton: Strategi balas dendam kecerdasan wanita di istana dengan plot twist seru."
+        "1. Love Between Fairy and Devil\n   - Genre: Xianxia, Romance, Fantasy\n   - Rating: 9.2/10\n   - Alasan Nonton: Efek CGI spektakuler bertema iblis kuno Dongfang Qingcang.",
+        "2. Hidden Love\n   - Genre: Modern Romance, Youth\n   - Rating: 9.0/10\n   - Alasan Nonton: Drama romantis modern yang manis antara Sang Zhi dan Duan Jiaxu."
       ],
       donghua: [
-        "1. Soul Land / Douluo Dalu (斗罗大陆)\n   - Genre: 3D Cultivation, Action\n   - Rating: 9.4/10\n   - Alasan Nonton: Perjalanan Tang San menguasai Cincin Jiwa dan bertarung di Dunia Shrek dengan grafis 60 FPS.",
-        "2. Battle Through the Heavens (斗破苍穹)\n   - Genre: Xuanhuan, Cultivation\n   - Rating: 9.3/10\n   - Alasan Nonton: Petualangan Xiao Yan merebut Api Surgawi dan mencapai tingkatan God Dou Di.",
-        "3. Perfect World (完美世界)\n   - Genre: Ancient Myth, Overpower 3D\n   - Rating: 9.1/10\n   - Alasan Nonton: Pertarungan Shi Hao sang anak ajaib menghancurkan klan kuno penindas."
+        "1. Soul Land / Douluo Dalu\n   - Genre: 3D Cultivation, Action\n   - Rating: 9.4/10\n   - Alasan Nonton: Perjalanan Tang San menguasai Cincin Jiwa dengan grafis 60 FPS.",
+        "2. Battle Through the Heavens\n   - Genre: Xuanhuan, Cultivation\n   - Rating: 9.3/10\n   - Alasan Nonton: Petualangan Xiao Yan merebut Api Surgawi."
       ],
       komik: [
-        "1. Omniscient Reader's Viewpoint (Dokja)\n   - Genre: System, Dungeon, Apocalyptic\n   - Rating: 9.5/10\n   - Alasan Baca: Manhwa terbaik tentang pembaca tunggal yang mengetahui akhir dunia dari novel kesayangannya.",
-        "2. The Beginning After The End (TBATE)\n   - Genre: Reincarnation, Magic Sword\n   - Rating: 9.3/10\n   - Alasan Baca: Petualangan Raja Grey terlahir kembali di dunia sihir sebagai Arthur Leywin.",
-        "3. Nano Machine\n   - Genre: Wuxia, Sci-Fi System\n   - Rating: 9.2/10\n   - Alasan Baca: Gabungan seni bela diri Sekte Iblis dan teknologi nano masa depan."
+        "1. Omniscient Reader's Viewpoint\n   - Genre: System, Dungeon, Apocalyptic\n   - Rating: 9.5/10\n   - Alasan Baca: Manhwa terbaik tentang pembaca tunggal yang mengetahui akhir dunia.",
+        "2. Nano Machine\n   - Genre: Wuxia, Sci-Fi System\n   - Rating: 9.2/10\n   - Alasan Baca: Gabungan seni bela diri Sekte Iblis dan teknologi nano masa depan."
       ],
       films: [
-        "1. Dune: Part Two\n   - Genre: Sci-Fi, Epic Adventure\n   - Rating: 9.3/10\n   - Alasan Nonton: Mahakarya sinema Dennis Villeneuve dengan kualitas tata suara Dolby Atmos di planet Arrakis.",
-        "2. Deadpool & Wolverine\n   - Genre: Superhero, Comedy, Action\n   - Rating: 9.0/10\n   - Alasan Nonton: Reuni konyol dan penuh aksi brutal multiverse antara Ryan Reynolds dan Hugh Jackman.",
-        "3. Oppenheimer\n   - Genre: Historical Biography, Drama\n   - Rating: 9.2/10\n   - Alasan Nonton: Karya terbaik Christopher Nolan tentang lahirnya bom atom pertama di dunia."
+        "1. Dune: Part Two\n   - Genre: Sci-Fi, Epic Adventure\n   - Rating: 9.3/10\n   - Alasan Nonton: Mahakarya sinema Dennis Villeneuve dengan kualitas Dolby Atmos.",
+        "2. Deadpool & Wolverine\n   - Genre: Superhero, Comedy, Action\n   - Rating: 9.0/10\n   - Alasan Nonton: Reuni konyol dan penuh aksi brutal multiverse Marvel."
       ]
     };
 
-    // Initial load setup
+    // INITIALIZATION
     window.onload = function() {
       initTheme();
+      renderUserNav();
+      renderChatMessages();
+      renderLeaderboard();
+      updateBookmarkIcons();
+      saveState();
+      initSupabaseData();
     };
 
-    // Dark/Light Theme Switching Logic
+    // Supabase Realtime & Database Integration
+    async function initSupabaseData() {
+      if (!supabaseClient) return;
+
+      try {
+        // Synchronize Chat Messages from Supabase
+        const { data: messages } = await supabaseClient
+          .from('chat_messages')
+          .select('*')
+          .order('id', { ascending: true })
+          .limit(50);
+        
+        if (messages && messages.length > 0) {
+          chatMessages = messages;
+          renderChatMessages();
+        }
+
+        // Synchronize Users & Leaderboard from Supabase
+        const { data: dbUsers } = await supabaseClient
+          .from('users')
+          .select('*')
+          .order('xp', { ascending: false });
+
+        if (dbUsers && dbUsers.length > 0) {
+          usersList = dbUsers;
+          renderLeaderboard();
+        }
+
+        // Realtime Subscription for Live Chat
+        supabaseClient
+          .channel('public:chat_messages')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+            if (payload.new && !chatMessages.some(m => m.id === payload.new.id)) {
+              chatMessages.push(payload.new);
+              if (chatMessages.length > 50) chatMessages.shift();
+              renderChatMessages();
+            }
+          })
+          .subscribe();
+      } catch (err) {
+        console.log("Supabase Sync:", err);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem('ray_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('ray_users_list', JSON.stringify(usersList));
+      localStorage.setItem('ray_chat_messages', JSON.stringify(chatMessages));
+      localStorage.setItem('ray_pinned_msg', pinnedMessageText);
+      localStorage.setItem('ray_bookmarks', JSON.stringify(bookmarks));
+      localStorage.setItem('ray_activities', JSON.stringify(activityHistory));
+
+      // Sync user state to Supabase cloud if connected
+      if (supabaseClient && !currentUser.isAnonymous) {
+        Promise.resolve(supabaseClient.from('users').upsert({
+          id: currentUser.id,
+          username: currentUser.username,
+          role: currentUser.role,
+          level: currentUser.level,
+          xp: currentUser.xp,
+          avatar: currentUser.avatar
+        })).catch(err => console.log(err));
+      }
+    }
+
+    // THEME & SOUND
     function initTheme() {
       const savedTheme = localStorage.getItem('rayliziie_theme');
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
       if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
         document.documentElement.classList.add('dark');
         updateThemeIcon(true);
@@ -822,46 +1319,11 @@
 
     function updateThemeIcon(isDark) {
       const themeIcon = document.getElementById('theme-icon');
-      if (isDark) {
-        themeIcon.className = 'fa-solid fa-sun text-amber-400 text-base';
-        document.getElementById('theme-toggle').title = "Ganti ke Mode Terang";
-      } else {
-        themeIcon.className = 'fa-solid fa-moon text-slate-700 text-base';
-        document.getElementById('theme-toggle').title = "Ganti ke Mode Gelap";
+      if (themeIcon) {
+        themeIcon.className = isDark ? 'fa-solid fa-sun text-amber-400 text-xs' : 'fa-solid fa-moon text-slate-700 text-xs';
       }
     }
 
-    // Direct Category Redirect Logic
-    function openCategoryTarget(category) {
-      playBeepSound(800, 0.08);
-      let url = CATEGORY_URLS[category] ? CATEGORY_URLS[category].trim() : '';
-
-      if (url && url !== '') {
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url;
-        }
-        window.open(url, '_blank');
-      } else {
-        showLuxuryToast(`Link kategori ${category.toUpperCase()} belum diisi di dalam kode index.html`);
-      }
-    }
-
-    // Category Live Filter
-    function filterCategories() {
-      const query = document.getElementById('category-search').value.toLowerCase();
-      const cards = document.querySelectorAll('#category-grid > div');
-
-      cards.forEach(card => {
-        const name = card.getAttribute('data-name');
-        if (name.includes(query)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-
-    // UI Sound Synthesis (No External Audio Files Needed)
     function toggleSound() {
       soundEnabled = !soundEnabled;
       const soundIcon = document.getElementById('sound-icon');
@@ -876,9 +1338,7 @@
     function playBeepSound(freq, duration) {
       if (!soundEnabled) return;
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
@@ -889,16 +1349,525 @@
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {
-        // Audio fallback
+      } catch (e) {}
+    }
+
+    // USER XP & LEVEL ENGINE
+    function addXp(amount, reason) {
+      currentUser.xp += amount;
+      const newLevel = Math.floor(currentUser.xp / 100) + 1;
+      if (newLevel > currentUser.level) {
+        currentUser.level = newLevel;
+        showLuxuryToast(`🎉 Selamat! Anda naik ke Level ${currentUser.level}!`);
+        playBeepSound(900, 0.15);
+      } else {
+        showLuxuryToast(`✨ +${amount} XP (${reason})`);
+      }
+
+      // Sync user in usersList
+      const idx = usersList.findIndex(u => u.id === currentUser.id);
+      if (idx !== -1) {
+        usersList[idx].xp = currentUser.xp;
+        usersList[idx].level = currentUser.level;
+      } else {
+        usersList.push({...currentUser});
+      }
+
+      addActivityLog(`Mendapatkan +${amount} XP dari ${reason}`);
+      saveState();
+      renderUserNav();
+      renderLeaderboard();
+    }
+
+    function addActivityLog(text) {
+      activityHistory.unshift({ text, time: new Date().toLocaleTimeString() });
+      if (activityHistory.length > 20) activityHistory.pop();
+      saveState();
+    }
+
+    function getRankTitle(level) {
+      if (level >= 50) return '👑 Rayliziie Legend';
+      if (level >= 30) return '💎 Mythic Streamer';
+      if (level >= 20) return '🥇 Diamond Streamer';
+      if (level >= 10) return '🥈 Gold Streamer';
+      if (level >= 5)  return '🥉 Silver Streamer';
+      return '⭐ Bronze Streamer';
+    }
+
+    // USER AUTH CONTROLLER
+    function renderUserNav() {
+      const container = document.getElementById('user-nav-container');
+      if (!container) return;
+
+      if (currentUser.isAnonymous) {
+        container.innerHTML = `
+          <button onclick="openModal('auth-modal')" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-brand-cyan text-slate-950 font-black text-[11px] sm:text-xs shadow-glow-cyan hover:opacity-90 transition">
+            <i class="fa-solid fa-right-to-bracket text-xs"></i>
+            <span>Masuk</span>
+          </button>
+        `;
+      } else {
+        const isOwner = currentUser.role === 'owner';
+        container.innerHTML = `
+          <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-2 py-1 rounded-lg sm:rounded-xl bg-slate-200 dark:bg-slate-900 border ${isOwner ? 'border-amber-500/60' : 'border-slate-300 dark:border-slate-800'} text-slate-800 dark:text-slate-100 text-[11px] sm:text-xs font-bold transition">
+            <img src="${currentUser.avatar}" alt="Avatar" class="w-5 h-5 rounded-full object-cover">
+            <span class="max-w-[70px] sm:max-w-[100px] truncate">${currentUser.username}</span>
+            <span class="text-[9px] px-1.5 py-0.2 rounded bg-brand-orange/20 text-brand-orange font-black">Lvl ${currentUser.level}</span>
+          </button>
+        `;
       }
     }
 
-    // =========================================================================
-    // GEMINI LLM API & IMAGEN INTEGRATION FEATURES
-    // =========================================================================
+    function handleUserLogin() {
+      const username = document.getElementById('login-username').value.trim();
+      const passcode = document.getElementById('login-passcode').value.trim();
 
-    // Switch between AI Chat and Poster Studio Tabs
+      if (!username) {
+        showLuxuryToast("Silakan masukkan username Anda.");
+        return;
+      }
+
+      playBeepSound(750, 0.08);
+
+      if (passcode === 'owner123') {
+        currentUser = {
+          id: 'usr-owner-001',
+          username: username + ' (Owner)',
+          role: 'owner',
+          isAnonymous: false,
+          level: 99,
+          xp: 9990,
+          avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(username)
+        };
+        showLuxuryToast("👑 Selamat datang kembali, OWNER Resmi!");
+      } else {
+        const existing = usersList.find(u => u.username.toLowerCase() === username.toLowerCase());
+        if (existing) {
+          currentUser = {...existing, isAnonymous: false};
+        } else {
+          currentUser = {
+            id: 'usr-' + Math.floor(1000 + Math.random() * 9000),
+            username: username,
+            role: 'user',
+            isAnonymous: false,
+            level: 1,
+            xp: 0,
+            avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(username)
+          };
+          usersList.push({...currentUser});
+        }
+        showLuxuryToast(`Selamat datang, ${currentUser.username}!`);
+      }
+
+      addActivityLog('Login ke sistem sebagai ' + currentUser.username);
+      saveState();
+      renderUserNav();
+      closeModal('auth-modal');
+    }
+
+    function handleAnonymousLogin() {
+      playBeepSound(600, 0.05);
+      currentUser = {
+        id: 'usr-guest-' + Math.floor(1000 + Math.random() * 9000),
+        username: 'Streamer_' + Math.floor(100 + Math.random() * 900),
+        role: 'user',
+        isAnonymous: true,
+        level: 1,
+        xp: 0,
+        avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Guest' + Math.random()
+      };
+      saveState();
+      renderUserNav();
+      closeModal('auth-modal');
+      showLuxuryToast("Masuk dalam mode Anonim (Tamu).");
+    }
+
+    function logoutUser() {
+      playBeepSound(500, 0.08);
+      handleAnonymousLogin();
+      closeModal('profile-modal');
+    }
+
+    // PROFILE MODAL CONTROLLER
+    function openProfileModal() {
+      playBeepSound(650, 0.05);
+      document.getElementById('prof-avatar-img').src = currentUser.avatar;
+      document.getElementById('prof-username-text').innerText = currentUser.username;
+      document.getElementById('prof-user-id').innerText = 'ID: ' + currentUser.id;
+      document.getElementById('prof-rank-badge').innerText = getRankTitle(currentUser.level);
+      document.getElementById('prof-level-text').innerHTML = `<i class="fa-solid fa-layer-group text-brand-orange"></i> Level ${currentUser.level}`;
+      
+      const currentLevelXp = currentUser.xp % 100;
+      document.getElementById('prof-xp-text').innerText = `${currentLevelXp} / 100 XP (Total: ${currentUser.xp})`;
+      document.getElementById('prof-xp-progress').style.width = `${currentLevelXp}%`;
+
+      const ownerBadge = document.getElementById('prof-owner-badge');
+      const ownerBtn = document.getElementById('prof-owner-btn');
+      if (currentUser.role === 'owner') {
+        ownerBadge.classList.remove('hidden');
+        ownerBtn.classList.remove('hidden');
+      } else {
+        ownerBadge.classList.add('hidden');
+        ownerBtn.classList.add('hidden');
+      }
+
+      renderProfileBookmarks();
+      renderProfileActivity();
+      openModal('profile-modal');
+    }
+
+    function switchProfileTab(tab) {
+      playBeepSound(600, 0.05);
+      const bmContainer = document.getElementById('prof-bookmarks-container');
+      const actContainer = document.getElementById('prof-activity-container');
+      const bmBtn = document.getElementById('prof-tab-bm');
+      const actBtn = document.getElementById('prof-tab-act');
+
+      if (tab === 'bookmarks') {
+        bmContainer.classList.remove('hidden');
+        actContainer.classList.add('hidden');
+        bmBtn.className = "px-4 py-2 border-b-2 border-brand-cyan text-brand-cyan font-bold";
+        actBtn.className = "px-4 py-2 text-slate-400 hover:text-white font-bold";
+      } else {
+        bmContainer.classList.add('hidden');
+        actContainer.classList.remove('hidden');
+        actBtn.className = "px-4 py-2 border-b-2 border-brand-cyan text-brand-cyan font-bold";
+        bmBtn.className = "px-4 py-2 text-slate-400 hover:text-white font-bold";
+      }
+    }
+
+    function renderProfileBookmarks() {
+      const container = document.getElementById('prof-bookmarks-container');
+      if (bookmarks.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs"><i class="fa-regular fa-bookmark text-2xl mb-1 block"></i>Belum ada kategori yang disimpan.</div>`;
+        return;
+      }
+
+      container.innerHTML = bookmarks.map(cat => `
+        <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+          <div class="flex items-center gap-2 font-bold text-white">
+            <i class="fa-solid fa-play text-brand-orange"></i> Portal Kategori ${cat}
+          </div>
+          <button onclick="openCategoryTarget('${cat}')" class="px-2.5 py-1 rounded-lg bg-brand-cyan text-slate-950 font-black text-[10px]">
+            Buka Situs
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderProfileActivity() {
+      const container = document.getElementById('prof-activity-container');
+      if (activityHistory.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Belum ada riwayat aktivitas.</div>`;
+        return;
+      }
+
+      container.innerHTML = activityHistory.map(act => `
+        <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 text-[11px] flex justify-between text-slate-300">
+          <span>${act.text}</span>
+          <span class="text-slate-500 text-[10px]">${act.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleBookmark(category, event) {
+      if (event) event.stopPropagation();
+      playBeepSound(700, 0.05);
+
+      const idx = bookmarks.indexOf(category);
+      if (idx === -1) {
+        bookmarks.push(category);
+        addXp(10, 'Bookmark Kategori');
+        showLuxuryToast(`Disimpan ke bookmark: ${category}`);
+      } else {
+        bookmarks.splice(idx, 1);
+        showLuxuryToast(`Dihapus dari bookmark: ${category}`);
+      }
+
+      saveState();
+      updateBookmarkIcons();
+    }
+
+    function updateBookmarkIcons() {
+      ['Anime', 'Dracin', 'Drakor', 'Donghua', 'Komik', 'Films'].forEach(cat => {
+        const icon = document.getElementById(`bm-icon-${cat}`);
+        if (icon) {
+          if (bookmarks.includes(cat)) {
+            icon.className = "fa-solid fa-bookmark text-brand-gold";
+          } else {
+            icon.className = "fa-regular fa-bookmark text-slate-400";
+          }
+        }
+      });
+    }
+
+    // LIVE CHAT CONTROLLER
+    function renderChatMessages() {
+      const container = document.getElementById('chat-messages-container');
+      const pinnedBox = document.getElementById('pinned-message-text');
+      const unpinBtn = document.getElementById('unpin-btn');
+
+      if (pinnedBox) pinnedBox.innerText = pinnedMessageText;
+      if (unpinBtn && currentUser.role === 'owner') unpinBtn.classList.remove('hidden');
+
+      if (!container) return;
+
+      container.innerHTML = chatMessages.map(msg => {
+        const isMe = msg.userId === currentUser.id;
+        const isOwnerMsg = msg.role === 'owner';
+
+        return `
+          <div class="flex items-start gap-2.5 ${isMe ? 'flex-row-reverse' : ''}">
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(msg.username)}" class="w-7 h-7 rounded-full bg-slate-800 flex-shrink-0 mt-0.5">
+            <div class="max-w-[80%] space-y-1">
+              <div class="flex items-center gap-1.5 ${isMe ? 'justify-end' : ''} text-[10px] text-slate-400">
+                <span class="font-bold text-slate-200">${msg.username}</span>
+                ${isOwnerMsg ? '<span class="bg-gradient-to-r from-amber-500 to-brand-orange text-white font-black text-[8px] px-1.5 py-0.2 rounded-full">👑 OWNER</span>' : ''}
+                <span>${msg.time}</span>
+              </div>
+
+              <div class="p-2.5 rounded-2xl text-xs leading-relaxed ${isMe ? 'bg-gradient-to-r from-brand-orange to-amber-500 text-white rounded-tr-none shadow-md' : 'bg-slate-200 dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-300 dark:border-slate-800'}">
+                ${msg.text}
+                ${msg.image ? `<img src="${msg.image}" class="mt-2 rounded-lg max-h-40 w-auto object-cover border border-slate-700">` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input-text');
+      const text = input.value.trim();
+
+      if (!text && !selectedImageBase64) return;
+
+      playBeepSound(800, 0.05);
+
+      const newMsg = {
+        id: Date.now(),
+        userId: currentUser.id,
+        username: currentUser.username,
+        role: currentUser.role,
+        text: text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        image: selectedImageBase64
+      };
+
+      chatMessages.push(newMsg);
+      if (chatMessages.length > 50) chatMessages.shift();
+
+      // Send message to Supabase Realtime Database
+      if (supabaseClient) {
+        Promise.resolve(supabaseClient.from('chat_messages').insert([newMsg])).catch(e => console.log(e));
+      }
+
+      input.value = '';
+      clearImageUpload();
+      addXp(15, 'Aktivitas Live Chat');
+      saveState();
+      renderChatMessages();
+    }
+
+    function toggleEmojiPicker() {
+      const picker = document.getElementById('emoji-picker-box');
+      picker.classList.toggle('hidden');
+    }
+
+    function addEmoji(emoji) {
+      const input = document.getElementById('chat-input-text');
+      input.value += emoji;
+      toggleEmojiPicker();
+    }
+
+    function handleImageFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedImageBase64 = e.target.result;
+        document.getElementById('image-upload-preview').src = selectedImageBase64;
+        document.getElementById('image-upload-preview-container').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearImageUpload() {
+      selectedImageBase64 = null;
+      document.getElementById('image-upload-preview-container').classList.add('hidden');
+      document.getElementById('chat-file-input').value = '';
+    }
+
+    function unpinMessage() {
+      if (currentUser.role !== 'owner') return;
+      pinnedMessageText = '🔥 Rayliziie Official Live Chat Active.';
+      saveState();
+      renderChatMessages();
+    }
+
+    // LEADERBOARD CONTROLLER
+    function renderLeaderboard() {
+      const tbody = document.getElementById('leaderboard-table-body');
+      if (!tbody) return;
+
+      const sortedUsers = [...usersList].sort((a, b) => b.xp - a.xp);
+
+      tbody.innerHTML = sortedUsers.map((usr, idx) => {
+        let rankBadge = `<span class="font-black text-slate-400">#${idx + 1}</span>`;
+        if (idx === 0) rankBadge = `<span class="text-amber-400 text-sm font-black"><i class="fa-solid fa-crown mr-0.5"></i> #1</span>`;
+        if (idx === 1) rankBadge = `<span class="text-slate-300 text-sm font-black"><i class="fa-solid fa-medal mr-0.5"></i> #2</span>`;
+        if (idx === 2) rankBadge = `<span class="text-amber-600 text-sm font-black"><i class="fa-solid fa-award mr-0.5"></i> #3</span>`;
+
+        return `
+          <tr class="hover:bg-slate-100 dark:hover:bg-slate-900/50 transition">
+            <td class="py-2.5 px-3">${rankBadge}</td>
+            <td class="py-2.5 px-3 flex items-center gap-2">
+              <img src="${usr.avatar}" class="w-6 h-6 rounded-full bg-slate-800">
+              <span class="font-bold text-slate-800 dark:text-slate-100">${usr.username}</span>
+              ${usr.role === 'owner' ? '<span class="text-[8px] bg-amber-500 text-white font-black px-1 rounded">OWNER</span>' : ''}
+            </td>
+            <td class="py-2.5 px-3 text-brand-cyan font-semibold text-[10px]">${getRankTitle(usr.level)}</td>
+            <td class="py-2.5 px-3 font-bold text-brand-orange">Lvl ${usr.level}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-400">${usr.xp} XP</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // OWNER CONTROL PANEL CONTROLLER
+    function openOwnerPanel() {
+      if (currentUser.role !== 'owner') {
+        showLuxuryToast("Akses ditolak: Hanya OWNER resmi yang dapat membuka panel ini.");
+        return;
+      }
+
+      playBeepSound(900, 0.08);
+      const userSelect = document.getElementById('owner-user-select');
+      userSelect.innerHTML = usersList.map(u => `<option value="${u.id}">${u.username} (Lvl ${u.level} - ${u.xp} XP)</option>`).join('');
+
+      renderOwnerUserTable();
+      openModal('owner-modal');
+    }
+
+    function renderOwnerUserTable() {
+      const tbody = document.getElementById('owner-user-table-body');
+      if (!tbody) return;
+
+      tbody.innerHTML = usersList.map(u => `
+        <tr class="hover:bg-slate-900">
+          <td class="p-2 font-bold">${u.username}</td>
+          <td class="p-2 text-slate-400">${u.role}</td>
+          <td class="p-2 font-bold text-brand-orange">Lvl ${u.level}</td>
+          <td class="p-2 text-brand-cyan">${u.xp} XP</td>
+          <td class="p-2 text-right">
+            <button onclick="ownerDeleteUser('${u.id}')" class="text-rose-400 hover:underline">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function ownerAddXp() {
+      const userId = document.getElementById('owner-user-select').value;
+      const amount = parseInt(document.getElementById('owner-xp-amount').value, 10) || 0;
+
+      const target = usersList.find(u => u.id === userId);
+      if (target) {
+        target.xp += amount;
+        target.level = Math.floor(target.xp / 100) + 1;
+        if (target.id === currentUser.id) currentUser = {...target};
+        saveState();
+        renderOwnerUserTable();
+        renderLeaderboard();
+        showLuxuryToast(`Berhasil menambah ${amount} XP untuk ${target.username}.`);
+      }
+    }
+
+    function ownerSetLevel() {
+      const userId = document.getElementById('owner-user-select').value;
+      const level = parseInt(document.getElementById('owner-level-amount').value, 10) || 1;
+
+      const target = usersList.find(u => u.id === userId);
+      if (target) {
+        target.level = level;
+        target.xp = (level - 1) * 100;
+        if (target.id === currentUser.id) currentUser = {...target};
+        saveState();
+        renderOwnerUserTable();
+        renderLeaderboard();
+        showLuxuryToast(`Berhasil mengubah Level ${target.username} menjadi Lvl ${level}.`);
+      }
+    }
+
+    function ownerUpdatePinText() {
+      const text = document.getElementById('owner-pin-input').value.trim();
+      if (!text) return;
+
+      pinnedMessageText = text;
+      saveState();
+      renderChatMessages();
+      showLuxuryToast("Pengumuman Pin Chat diperbarui!");
+    }
+
+    function ownerClearAllChat() {
+      chatMessages = [];
+      saveState();
+      renderChatMessages();
+      showLuxuryToast("Semua pesan Live Chat telah dibersihkan oleh Owner.");
+    }
+
+    function ownerDeleteUser(id) {
+      if (id === currentUser.id) {
+        showLuxuryToast("Tidak dapat menghapus akun Anda sendiri.");
+        return;
+      }
+
+      usersList = usersList.filter(u => u.id !== id);
+      saveState();
+      renderOwnerUserTable();
+      renderLeaderboard();
+      showLuxuryToast("Pengguna berhasil dihapus.");
+    }
+
+    // MODAL HELPERS
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // CATEGORY REDIRECT & FILTER
+    function openCategoryTarget(category) {
+      playBeepSound(800, 0.08);
+      let url = CATEGORY_URLS[category] ? CATEGORY_URLS[category].trim() : '';
+
+      addActivityLog(`Membuka portal kategori ${category}`);
+
+      if (url && url !== '') {
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        window.open(url, '_blank');
+      } else {
+        showLuxuryToast(`Link kategori ${category.toUpperCase()} belum diisi di dalam kode index.html`);
+      }
+    }
+
+    function filterCategories() {
+      const query = document.getElementById('category-search').value.toLowerCase();
+      const cards = document.querySelectorAll('#category-grid > div');
+
+      cards.forEach(card => {
+        const name = card.getAttribute('data-name');
+        card.style.display = name.includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    // GEMINI AI CHAT & IMAGEN CONTROLLERS
     function switchAiTab(tab) {
       playBeepSound(700, 0.05);
       const chatTab = document.getElementById('ai-tab-chat');
@@ -909,13 +1878,13 @@
       if (tab === 'chat') {
         chatTab.classList.remove('hidden');
         imageTab.classList.add('hidden');
-        chatBtn.className = "flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-cyan text-slate-950 shadow-md flex items-center justify-center gap-2";
-        imageBtn.className = "flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-2";
+        chatBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all bg-brand-cyan text-slate-950 shadow-md flex items-center justify-center gap-1.5";
+        imageBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5";
       } else {
         chatTab.classList.add('hidden');
         imageTab.classList.remove('hidden');
-        imageBtn.className = "flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all bg-brand-purple text-white shadow-md flex items-center justify-center gap-2";
-        chatBtn.className = "flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-2";
+        imageBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all bg-brand-purple text-white shadow-md flex items-center justify-center gap-1.5";
+        chatBtn.className = "flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5";
       }
     }
 
@@ -924,7 +1893,6 @@
       document.getElementById('ai-prompt-input').value = promptText;
     }
 
-    // Call Gemini 3 Flash model for Recommendations with optional Search Grounding
     async function askGeminiAi() {
       const promptInput = document.getElementById('ai-prompt-input').value.trim();
       if (!promptInput) {
@@ -941,7 +1909,7 @@
       const useGrounding = document.getElementById('ai-grounding-toggle').checked;
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memproses...`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-xs"></i> Memproses...`;
       responseContainer.classList.remove('hidden');
       responseText.innerHTML = `<span class="italic text-slate-400"><i class="fa-solid fa-circle-notch animate-spin"></i> Menghubungkan ke Rayliziie AI Recommendation Engine...</span>`;
       sourcesContainer.classList.add('hidden');
@@ -950,16 +1918,14 @@
       const apiKey = "";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-      const systemPrompt = "Anda adalah Asisten Media Sinematik & Spesialis Rekomendasi Resmi PT. Rayliziie Official. Berikan rekomendasi tayangan (Anime, Dracin, Drakor, Donghua, Komik, atau Film) yang ramah, informatif, terstruktur dengan poin-poin menarik, rating, dan alasan kenapa wajib ditonton. Gunakan Bahasa Indonesia yang keren, sopan, dan antusias.";
+      const systemPrompt = "Anda adalah Asisten Media Sinematik & Spesialis Rekomendasi Resmi PT. Rayliziie Official. Berikan rekomendasi tayangan (Anime, Dracin, Drakor, Donghua, Komik, atau Film) yang ramah, informatif, terstruktur dengan poin-poin menarik, rating, dan alasan kenapa wajib ditonton. Gunakan Bahasa Indonesia yang keren dan antusias.";
 
       const payload = {
         contents: [{ parts: [{ text: promptInput }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] }
       };
 
-      if (useGrounding) {
-        payload.tools = [{ "google_search": {} }];
-      }
+      if (useGrounding) payload.tools = [{ "google_search": {} }];
 
       try {
         const response = await fetch(apiUrl, {
@@ -972,10 +1938,9 @@
         const candidate = result.candidates?.[0];
 
         if (candidate && candidate.content?.parts?.[0]?.text) {
-          const generatedText = candidate.content.parts[0].text;
-          responseText.innerText = generatedText;
+          responseText.innerText = candidate.content.parts[0].text;
+          addXp(20, 'Konsultasi Gemini AI');
 
-          // Render grounding sources if present
           const groundingMetadata = candidate.groundingMetadata;
           if (groundingMetadata && groundingMetadata.groundingAttributions) {
             const sources = groundingMetadata.groundingAttributions
@@ -985,18 +1950,16 @@
             if (sources.length > 0) {
               sourcesContainer.classList.remove('hidden');
               sourcesList.innerHTML = sources.map(src => `
-                <a href="${src.uri}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-brand-cyan/20 text-slate-700 dark:text-slate-300 hover:text-brand-cyan transition truncate max-w-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-up-right-from-square text-[10px]"></i> ${src.title}
+                <a href="${src.uri}" target="_blank" class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 hover:bg-brand-cyan/20 text-slate-700 dark:text-slate-300 transition truncate max-w-xs flex items-center gap-1">
+                  <i class="fa-solid fa-up-right-from-square text-[9px]"></i> ${src.title}
                 </a>
               `).join('');
             }
           }
         } else {
-          // Fallback rekomendasi cerdas jika API mengembalikan respons kosong
           renderSmartLocalFallback(promptInput, responseText);
         }
       } catch (err) {
-        console.warn("Gemini API Offline/Error, beralih ke Mesin Rekomendasi Cerdas Lokal:", err);
         renderSmartLocalFallback(promptInput, responseText);
       } finally {
         submitBtn.disabled = false;
@@ -1004,24 +1967,23 @@
       }
     }
 
-    // Fungsi Fallback Rekomendasi Cerdas
     function renderSmartLocalFallback(promptInput, responseText) {
       const queryLower = promptInput.toLowerCase();
       let categoryKey = 'anime';
 
       if (queryLower.includes('drakor') || queryLower.includes('korea')) categoryKey = 'drakor';
-      else if (queryLower.includes('dracin') || queryLower.includes('china drama') || queryLower.includes('mandarin')) categoryKey = 'dracin';
+      else if (queryLower.includes('dracin') || queryLower.includes('china drama')) categoryKey = 'dracin';
       else if (queryLower.includes('donghua') || queryLower.includes('3d')) categoryKey = 'donghua';
-      else if (queryLower.includes('komik') || queryLower.includes('manhwa') || queryLower.includes('manga')) categoryKey = 'komik';
-      else if (queryLower.includes('film') || queryLower.includes('movie') || queryLower.includes('bioskop')) categoryKey = 'films';
+      else if (queryLower.includes('komik') || queryLower.includes('manhwa')) categoryKey = 'komik';
+      else if (queryLower.includes('film') || queryLower.includes('movie')) categoryKey = 'films';
 
       const items = SMART_RECOMMENDATION_DATABASE[categoryKey];
-      const resultText = `✨ **Rekomendasi Spesial PT. Rayliziie AI Concierge**\n\nBerdasarkan pencarian Anda ("${promptInput}"), berikut adalah pilihan tayangan populer rating tertinggi yang sangat direkomendasikan untuk ditonton saat ini:\n\n` + items.join("\n\n") + `\n\n💡 *Tips: Pilih kategori tayangan di atas untuk membuka portal streaming utama secara langsung!*`;
+      const resultText = `✨ **Rekomendasi Spesial PT. Rayliziie AI Concierge**\n\nBerdasarkan pencarian Anda ("${promptInput}"), berikut pilihan tayangan populer rating tertinggi yang sangat direkomendasikan:\n\n` + items.join("\n\n");
 
       responseText.innerText = resultText;
+      addXp(20, 'Konsultasi Gemini AI');
     }
 
-    // Speak AI Output using Browser Native SpeechSynthesis (Terbukti Berfungsi di HP & Laptop)
     function speakAiResponse() {
       const responseText = document.getElementById('ai-response-text').innerText;
       if (!responseText || responseText.includes("Memproses rekomendasi")) return;
@@ -1031,60 +1993,40 @@
         return;
       }
 
-      // Reset any stuck or active speech synthesis queue
       if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
         window.speechSynthesis.cancel();
         updateTtsBtnState(false);
         return;
       }
 
-      // Clean markdown, emojis, and non-printable characters
       let cleanText = responseText
-        .replace(/[\*#_`~=+\-]/g, '') // Strip markdown symbols
-        .replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '') // Strip emojis
-        .replace(/\s+/g, ' ') // Collapse spaces
+        .replace(/[\*#_`~=+\-]/g, '')
+        .replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '')
+        .replace(/\s+/g, ' ')
         .trim();
 
       if (!cleanText) return;
-
-      if (cleanText.length > 350) {
-        cleanText = cleanText.substring(0, 350) + "...";
-      }
+      if (cleanText.length > 350) cleanText = cleanText.substring(0, 350) + "...";
 
       try {
         window.speechSynthesis.cancel();
-
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'id-ID';
         utterance.rate = 1.0;
-        utterance.pitch = 1.0;
 
         const voices = window.speechSynthesis.getVoices();
         if (voices && voices.length > 0) {
-          const indoVoice = voices.find(v => v.lang.startsWith('id') || v.lang.includes('ID') || (v.name && v.name.toLowerCase().includes('indonesia')));
-          if (indoVoice) {
-            utterance.voice = indoVoice;
-          }
+          const indoVoice = voices.find(v => v.lang.startsWith('id') || v.lang.includes('ID'));
+          if (indoVoice) utterance.voice = indoVoice;
         }
 
-        utterance.onstart = function() {
-          updateTtsBtnState(true, "Hentikan Suara");
-        };
-
-        utterance.onend = function() {
-          updateTtsBtnState(false);
-        };
-
-        utterance.onerror = function(e) {
-          console.warn("Primary TTS Utterance Error:", e);
-          updateTtsBtnState(false);
-        };
+        utterance.onstart = () => updateTtsBtnState(true, "Hentikan Suara");
+        utterance.onend = () => updateTtsBtnState(false);
+        utterance.onerror = () => updateTtsBtnState(false);
 
         window.speechSynthesis.speak(utterance);
       } catch (err) {
-        console.error("SpeechSynthesis execution error:", err);
         updateTtsBtnState(false);
-        showLuxuryToast("Gagal memutar audio di perangkat ini.");
       }
     }
 
@@ -1092,22 +2034,14 @@
       const ttsBtnText = document.getElementById('tts-btn-text');
       const ttsIcon = document.getElementById('tts-icon');
       if (isPlaying) {
-        ttsIcon.className = "fa-solid fa-square-stop animate-pulse text-rose-500";
+        ttsIcon.className = "fa-solid fa-square-stop animate-pulse text-rose-500 text-xs";
         ttsBtnText.innerText = customText || "Hentikan Suara";
       } else {
-        ttsIcon.className = "fa-solid fa-volume-high";
-        ttsBtnText.innerText = "Dengarkan Suara Sinopsis (AI Voice)";
+        ttsIcon.className = "fa-solid fa-volume-high text-xs";
+        ttsBtnText.innerText = "Dengarkan Suara Sinopsis";
       }
     }
 
-    // Load voices list properly for mobile Chrome / Safari
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = function() {
-        window.speechSynthesis.getVoices();
-      };
-    }
-
-    // Generate AI Posters using Imagen 4.0
     async function generateImageWithImagen() {
       const promptInput = document.getElementById('imagen-prompt-input').value.trim();
       if (!promptInput) {
@@ -1122,7 +2056,7 @@
       const downloadBtn = document.getElementById('imagen-download-btn');
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Merancang Poster AI...`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-xs"></i> Merancang Poster...`;
 
       const apiKey = "";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
@@ -1145,20 +2079,19 @@
           outputImg.src = imageUrl;
           downloadBtn.href = imageUrl;
           resultContainer.classList.remove('hidden');
+          addXp(25, 'Merancang Poster Imagen AI');
           showLuxuryToast("Poster AI berhasil dirancang!");
         } else {
           showLuxuryToast("Gagal memuat gambar poster dari Imagen.");
         }
       } catch (err) {
-        console.error("Imagen API Error:", err);
         showLuxuryToast("Terjadi kesalahan saat memproses generator gambar AI.");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Poster AI`;
+        submitBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Generate Poster AI`;
       }
     }
 
-    // Luxury Notification Toast
     function showLuxuryToast(message) {
       const existingToast = document.getElementById('luxury-toast');
       if (existingToast) existingToast.remove();
@@ -1179,7 +2112,7 @@
       setTimeout(() => {
         if (toast) toast.remove();
       }, 4500);
-    }
+    }vvv
   </script>
 
 </body>
