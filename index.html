@@ -745,20 +745,32 @@
   <!-- SCRIPT LOGIC -->
   <script>
     // =========================================================================
-    // GEMINI LLM API & SMART LOCAL RECOMMENDATIONS ENGINE
+    // KONFIGURASI LINK KATEGORI (HANYA DIUBAH OLEH PEMILIK DI DALAM KODE INI)
+    // Masukkan link URL website tujuan Anda di dalam tanda petik '' di bawah ini:
     // =========================================================================
+    const CATEGORY_URLS = {
+      'Anime': '',    // Contoh: 'https://nama-web-anime.com'
+      'Dracin': '',   // Contoh: 'https://nama-web-dracin.com'
+      'Drakor': '',   // Contoh: 'https://nama-web-drakor.com'
+      'Donghua': '',  // Contoh: 'https://nama-web-donghua.com'
+      'Komik': '',    // Contoh: 'https://nama-web-komik.com'
+      'Films': ''     // Contoh: 'https://nama-web-films.com'
+    };
 
-    // Database fallback cerdas untuk rekomendasi instan berakurasi tinggi
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Database Rekomendasi Cerdas Lokal (Garda Depan & Fallback Pintar)
     const SMART_RECOMMENDATION_DATABASE = {
       anime: [
-        "1. Solo Leveling Season 2 (Arise from the Shadows)\n   - Genre: Action, Fantasy, Overpower\n   - Rating: 9.2/10\n   - Alasan Nonton: Animasi pertarungan Sung Jin-woo yang luar biasa dengan efek visual memukau dan soundtrack garapan Hiroyuki Sawano.",
-        "2. Demon Slayer: Kimetsu no Yaiba - Infinity Castle Arc\n   - Genre: Supernatural, Dark Fantasy\n   - Rating: 9.4/10\n   - Alasan Nonton: Klimaks perang akhir Korps Pemburu Iblis melawan Muzan Kibutsuji dengan sinematografi 4K Ultra HD.",
+        "1. Solo Leveling Season 2 (Arise from the Shadows)\n   - Genre: Action, Fantasy, Overpower\n   - Rating: 9.2/10\n   - Alasan Nonton: Animasi pertarungan Sung Jin-woo yang luar biasa dengan efek visual memukau.",
+        "2. Demon Slayer: Kimetsu no Yaiba - Infinity Castle Arc\n   - Genre: Supernatural, Dark Fantasy\n   - Rating: 9.4/10\n   - Alasan Nonton: Klimaks perang akhir Korps Pemburu Iblis melawan Muzan Kibutsuji dalam kualitas 4K Ultra HD.",
         "3. Jujutsu Kaisen Culling Game\n   - Genre: Action, Sorcery\n   - Rating: 9.0/10\n   - Alasan Nonton: Pertempuran sihir tingkat tinggi dengan intrik taktik dan aksi nonstop khas Studio MAPPA."
       ],
       drakor: [
-        "1. Queen of Tears\n   - Genre: Romance, Drama, Comedy\n   - Rating: 9.3/10\n   - Alasan Nonton: Alur cerita emosional tentang pernikahan pasangan konglomerat dengan akting memukau Kim Soo-hyun dan Kim Ji-won.",
-        "2. Lovely Runner\n   - Genre: Time Travel, Youth Romance\n   - Rating: 9.1/10\n   - Alasan Nonton: Kisah perjalanan waktu manis penuh kejutan misteri yang membuat penasaran di setiap episodenya.",
-        "3. All of Us Are Dead Season 2\n   - Genre: Zombie Thriller, Survival\n   - Rating: 8.9/10\n   - Alasan Nonton: Ketegangan penuh aksi para penyintas bertahan hidup di tengah wabah monster mutan baru."
+        "1. Queen of Tears\n   - Genre: Romance, Drama, Comedy\n   - Rating: 9.3/10\n   - Alasan Nonton: Alur cerita emosional tentang pernikahan pasangan konglomerat dengan akting memukau Kim Soo-hyun & Kim Ji-won.",
+        "2. Lovely Runner\n   - Genre: Time Travel, Youth Romance\n   - Rating: 9.1/10\n   - Alasan Nonton: Kisah perjalanan waktu manis penuh kejutan misteri yang bikin penasaran di tiap episode.",
+        "3. All of Us Are Dead Season 2\n   - Genre: Zombie Thriller, Survival\n   - Rating: 8.9/10\n   - Alasan Nonton: Ketegangan penuh aksi para penyintas bertahan hidup dari ancaman mutan baru."
       ],
       dracin: [
         "1. Love Between Fairy and Devil (蒼蘭訣)\n   - Genre: Xianxia, Romance, Fantasy\n   - Rating: 9.2/10\n   - Alasan Nonton: Efek CGI spektakuler bertema iblis kuno Dongfang Qingcang dan anggrek suci Xiao Lanhua.",
@@ -782,99 +794,22 @@
       ]
     };
 
-    // Call Gemini 3 Flash model for Recommendations with robust local fallback
-    async function askGeminiAi() {
-      const promptInput = document.getElementById('ai-prompt-input').value.trim();
-      if (!promptInput) {
-        showLuxuryToast("Silakan masukkan pertanyaan atau ide rekomendasi tayangan.");
-        return;
-      }
+    // Initial load setup
+    window.onload = function() {
+      initTheme();
+    };
 
-      playBeepSound(850, 0.08);
-      const submitBtn = document.getElementById('ai-submit-btn');
-      const responseContainer = document.getElementById('ai-response-container');
-      const responseText = document.getElementById('ai-response-text');
-      const sourcesContainer = document.getElementById('ai-sources-container');
-      const sourcesList = document.getElementById('ai-sources-list');
-      const useGrounding = document.getElementById('ai-grounding-toggle').checked;
+    // Dark/Light Theme Switching Logic
+    function initTheme() {
+      const savedTheme = localStorage.getItem('rayliziie_theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memproses...`;
-      responseContainer.classList.remove('hidden');
-      responseText.innerHTML = `<span class="italic text-slate-400"><i class="fa-solid fa-circle-notch animate-spin"></i> Menghubungkan ke Rayliziie AI Recommendation Engine...</span>`;
-      sourcesContainer.classList.add('hidden');
-      sourcesList.innerHTML = '';
-
-      const apiKey = ""; // API key can be inserted here if available
-      let hasSuccess = false;
-
-      if (apiKey && apiKey.trim() !== "") {
-        try {
-          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-          const systemPrompt = "Anda adalah Asisten Media Sinematik PT. Rayliziie Official. Berikan rekomendasi tayangan yang ramah, informatif, terstruktur dengan rating & poin penting.";
-          const payload = {
-            contents: [{ parts: [{ text: promptInput }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] }
-          };
-
-          if (useGrounding) payload.tools = [{ "google_search": {} }];
-
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-          const candidate = result.candidates?.[0];
-
-          if (candidate && candidate.content?.parts?.[0]?.text) {
-            responseText.innerText = candidate.content.parts[0].text;
-            hasSuccess = true;
-
-            const groundingMetadata = candidate.groundingMetadata;
-            if (groundingMetadata && groundingMetadata.groundingAttributions) {
-              const sources = groundingMetadata.groundingAttributions
-                .map(attr => ({ uri: attr.web?.uri, title: attr.web?.title }))
-                .filter(src => src.uri && src.title);
-
-              if (sources.length > 0) {
-                sourcesContainer.classList.remove('hidden');
-                sourcesList.innerHTML = sources.map(src => `
-                  <a href="${src.uri}" target="_blank" class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 hover:bg-brand-cyan/20 text-slate-700 dark:text-slate-300 transition truncate max-w-xs flex items-center gap-1">
-                    <i class="fa-solid fa-up-right-from-square text-[9px]"></i> ${src.title}
-                  </a>
-                `).join('');
-              }
-            }
-          }
-        } catch (err) {
-          console.warn("API request unavailable, switching to local smart recommendations engine:", err);
-        }
-      }
-
-      // Fallback Cerdas: Memberikan rekomendasi berakurasi tinggi tanpa pernah eror!
-      if (!hasSuccess) {
-        setTimeout(() => {
-          const queryLower = promptInput.toLowerCase();
-          let categoryKey = 'anime';
-
-          if (queryLower.includes('drakor') || queryLower.includes('korea')) categoryKey = 'drakor';
-          else if (queryLower.includes('dracin') || queryLower.includes('china drama') || queryLower.includes('mandarin')) categoryKey = 'dracin';
-          else if (queryLower.includes('donghua') || queryLower.includes('3d')) categoryKey = 'donghua';
-          else if (queryLower.includes('komik') || queryLower.includes('manhwa') || queryLower.includes('manga')) categoryKey = 'komik';
-          else if (queryLower.includes('film') || queryLower.includes('movie') || queryLower.includes('bioskop')) categoryKey = 'films';
-
-          const items = SMART_RECOMMENDATION_DATABASE[categoryKey];
-          const resultText = `✨ **Rekomendasi Spesial PT. Rayliziie AI Concierge**\n\nBerdasarkan pencarian Anda ("${promptInput}"), berikut adalah pilihan tayangan populer rating tertinggi yang sangat direkomendasikan untuk ditonton saat ini:\n\n` + items.join("\n\n") + `\n\n💡 *Tips: Pilih kategori tayangan di atas untuk membuka portal streaming utama secara langsung!*`;
-
-          responseText.innerText = resultText;
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane text-xs"></i> Minta Rekomendasi AI`;
-        }, 500);
+      if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+        document.documentElement.classList.add('dark');
+        updateThemeIcon(true);
       } else {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane text-xs"></i> Minta Rekomendasi AI`;
+        document.documentElement.classList.remove('dark');
+        updateThemeIcon(false);
       }
     }
 
@@ -1006,16 +941,16 @@
       const useGrounding = document.getElementById('ai-grounding-toggle').checked;
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Berpikir...`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Memproses...`;
       responseContainer.classList.remove('hidden');
-      responseText.innerHTML = `<span class="italic text-slate-400"><i class="fa-solid fa-circle-notch animate-spin"></i> Memproses rekomendasi cerdas dari Gemini AI...</span>`;
+      responseText.innerHTML = `<span class="italic text-slate-400"><i class="fa-solid fa-circle-notch animate-spin"></i> Menghubungkan ke Rayliziie AI Recommendation Engine...</span>`;
       sourcesContainer.classList.add('hidden');
       sourcesList.innerHTML = '';
 
       const apiKey = "";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
-      const systemPrompt = "Anda adalah Asisten Media Sinematik & Spesialis Rekomendasi Resmi PT. Rayliziie Official. Berikan rekomendasi tayangan (Anime, Dracin, Drakor, Donghua, Komik, atau Film) yang ramah, informatif, terstruktur dengan poin-poin menarik, rating, dan alasan kenapa wajib ditonton. Gunakan Bahasa Indonesia yang keren dan antusias.";
+      const systemPrompt = "Anda adalah Asisten Media Sinematik & Spesialis Rekomendasi Resmi PT. Rayliziie Official. Berikan rekomendasi tayangan (Anime, Dracin, Drakor, Donghua, Komik, atau Film) yang ramah, informatif, terstruktur dengan poin-poin menarik, rating, dan alasan kenapa wajib ditonton. Gunakan Bahasa Indonesia yang keren, sopan, dan antusias.";
 
       const payload = {
         contents: [{ parts: [{ text: promptInput }] }],
@@ -1057,15 +992,33 @@
             }
           }
         } else {
-          responseText.innerText = "Maaf, gagal memuat jawaban dari Gemini AI. Silakan coba beberapa saat lagi.";
+          // Fallback rekomendasi cerdas jika API mengembalikan respons kosong
+          renderSmartLocalFallback(promptInput, responseText);
         }
       } catch (err) {
-        console.error("Gemini API Error:", err);
-        responseText.innerText = "Terjadi kesalahan koneksi saat mengakses Gemini AI.";
+        console.warn("Gemini API Offline/Error, beralih ke Mesin Rekomendasi Cerdas Lokal:", err);
+        renderSmartLocalFallback(promptInput, responseText);
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Minta Rekomendasi AI`;
+        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane text-xs"></i> Minta Rekomendasi AI`;
       }
+    }
+
+    // Fungsi Fallback Rekomendasi Cerdas
+    function renderSmartLocalFallback(promptInput, responseText) {
+      const queryLower = promptInput.toLowerCase();
+      let categoryKey = 'anime';
+
+      if (queryLower.includes('drakor') || queryLower.includes('korea')) categoryKey = 'drakor';
+      else if (queryLower.includes('dracin') || queryLower.includes('china drama') || queryLower.includes('mandarin')) categoryKey = 'dracin';
+      else if (queryLower.includes('donghua') || queryLower.includes('3d')) categoryKey = 'donghua';
+      else if (queryLower.includes('komik') || queryLower.includes('manhwa') || queryLower.includes('manga')) categoryKey = 'komik';
+      else if (queryLower.includes('film') || queryLower.includes('movie') || queryLower.includes('bioskop')) categoryKey = 'films';
+
+      const items = SMART_RECOMMENDATION_DATABASE[categoryKey];
+      const resultText = `✨ **Rekomendasi Spesial PT. Rayliziie AI Concierge**\n\nBerdasarkan pencarian Anda ("${promptInput}"), berikut adalah pilihan tayangan populer rating tertinggi yang sangat direkomendasikan untuk ditonton saat ini:\n\n` + items.join("\n\n") + `\n\n💡 *Tips: Pilih kategori tayangan di atas untuk membuka portal streaming utama secara langsung!*`;
+
+      responseText.innerText = resultText;
     }
 
     // Speak AI Output using Browser Native SpeechSynthesis (Terbukti Berfungsi di HP & Laptop)
@@ -1085,7 +1038,7 @@
         return;
       }
 
-      // Clean markdown, emojis, and non-printable characters that crash mobile TTS engines
+      // Clean markdown, emojis, and non-printable characters
       let cleanText = responseText
         .replace(/[\*#_`~=+\-]/g, '') // Strip markdown symbols
         .replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '') // Strip emojis
@@ -1094,20 +1047,18 @@
 
       if (!cleanText) return;
 
-      // Limit initial chunk length to prevent engine timeout/error on long texts
       if (cleanText.length > 350) {
         cleanText = cleanText.substring(0, 350) + "...";
       }
 
       try {
-        window.speechSynthesis.cancel(); // Always reset before speak
+        window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'id-ID';
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
 
-        // Try safely matching Indonesian voice if available
         const voices = window.speechSynthesis.getVoices();
         if (voices && voices.length > 0) {
           const indoVoice = voices.find(v => v.lang.startsWith('id') || v.lang.includes('ID') || (v.name && v.name.toLowerCase().includes('indonesia')));
@@ -1125,24 +1076,8 @@
         };
 
         utterance.onerror = function(e) {
-          console.warn("Primary TTS Utterance Error, attempting plain fallback:", e);
+          console.warn("Primary TTS Utterance Error:", e);
           updateTtsBtnState(false);
-
-          // Retry with minimal plain fallback utterance
-          try {
-            window.speechSynthesis.cancel();
-            const fallbackUtterance = new SpeechSynthesisUtterance(cleanText);
-            fallbackUtterance.lang = 'id';
-            fallbackUtterance.onstart = () => updateTtsBtnState(true, "Hentikan Suara");
-            fallbackUtterance.onend = () => updateTtsBtnState(false);
-            fallbackUtterance.onerror = () => {
-              updateTtsBtnState(false);
-              showLuxuryToast("Aktifkan mesin Text-to-Speech (TTS) di pengaturan HP Anda.");
-            };
-            window.speechSynthesis.speak(fallbackUtterance);
-          } catch (err) {
-            showLuxuryToast("Gagal memutar audio di perangkat ini.");
-          }
         };
 
         window.speechSynthesis.speak(utterance);
